@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { put } from '@vercel/blob'
+import { generateText } from 'ai'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,45 +30,27 @@ Provide your analysis in a clear, structured format.
     `.trim()
 
     // Generate analysis using AI
-    const response = await fetch(process.env.AI_GATEWAY_URL!, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.AI_GATEWAY_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: aiPrompt,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: videoUrl,
-                },
-              },
-            ],
-          }
-        ],
-        stream: false,
-        max_tokens: 2000,
-      })
+    const result = await generateText({
+      model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: aiPrompt,
+            },
+            {
+              type: 'image',
+              image: videoUrl,
+            },
+          ],
+        }
+      ],
+      maxTokens: 2000,
     })
 
-    if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
-    }
-
-    const data = await response.json()
-    const text = data.choices[0].message.content
-
-    return NextResponse.json({ analysis: text })
+    return NextResponse.json({ analysis: result.text })
   } catch (error) {
     console.error("Video analysis error:", error)
     return NextResponse.json({ error: "Failed to analyze video" }, { status: 500 })
