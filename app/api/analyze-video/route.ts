@@ -10,10 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No video file provided" }, { status: 400 })
     }
 
-    // Convert video file to base64 for AI analysis
-    const bytes = await videoFile.arrayBuffer()
-    const base64Video = Buffer.from(bytes).toString("base64")
-    const mimeType = videoFile.type
+    // Note: Video processing will be implemented when AI model supports video analysis
 
     // Get AI prompt from environment variables
     const aiPrompt =
