@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { generateText } from "ai"
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +9,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No video file provided" }, { status: 400 })
     }
 
-    // Note: Video processing will be implemented when AI model supports video analysis
+    // Convert video file to base64 for AI analysis
+    const bytes = await videoFile.arrayBuffer()
+    const base64Video = Buffer.from(bytes).toString("base64")
+    const mimeType = videoFile.type
 
     // Get AI prompt from environment variables
     const aiPrompt =
@@ -22,13 +24,42 @@ Provide your analysis in a clear, structured format.
     `.trim()
 
     // Generate analysis using AI
-    const { text } = await generateText({
-      model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
-      prompt: aiPrompt,
-      maxTokens: 2000,
-      apiKey: process.env.AI_GATEWAY_API_KEY,
-      baseURL: process.env.AI_GATEWAY_URL,
+    const response = await fetch(process.env.AI_GATEWAY_URL!, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.AI_GATEWAY_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: aiPrompt,
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Video}`,
+                },
+              },
+            ],
+          }
+        ],
+        stream: false,
+        max_tokens: 2000,
+      })
     })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const text = data.choices[0].message.content
 
     return NextResponse.json({ analysis: text })
   } catch (error) {
