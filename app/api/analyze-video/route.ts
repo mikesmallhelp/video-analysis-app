@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
     // Upload video to Vercel Blob
     const blob = await put(videoFile.name, videoFile, {
       access: 'public',
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     })
 
     const videoUrl = blob.url
