@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { put } from '@vercel/blob'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +10,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No video file provided" }, { status: 400 })
     }
 
-    // Convert video file to base64 for AI analysis
-    const bytes = await videoFile.arrayBuffer()
-    const base64Video = Buffer.from(bytes).toString("base64")
-    const mimeType = videoFile.type
+    // Upload video to Vercel Blob
+    const blob = await put(videoFile.name, videoFile, {
+      access: 'public',
+    })
+
+    const videoUrl = blob.url
 
     // Get AI prompt from environment variables
     const aiPrompt =
@@ -43,7 +46,7 @@ Provide your analysis in a clear, structured format.
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:${mimeType};base64,${base64Video}`,
+                  url: videoUrl,
                 },
               },
             ],
