@@ -27,21 +27,7 @@ Provide your analysis in a clear, structured format.
     // Generate analysis using AI
     const { text } = await generateText({
       model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "text",
-              text: aiPrompt,
-            },
-            {
-              type: "video",
-              video: `data:${mimeType};base64,${base64Video}`,
-            },
-          ],
-        },
-      ],
+      prompt: aiPrompt,
       maxTokens: 2000,
       apiKey: process.env.AI_GATEWAY_API_KEY,
       baseURL: process.env.AI_GATEWAY_URL,
