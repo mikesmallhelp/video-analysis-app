@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const blob = await put(videoFile.name, videoFile, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN,
+      addRandomSuffix: true,
     })
 
     const videoUrl = blob.url
