@@ -31,9 +31,9 @@ export async function POST(request: NextRequest) {
 
     console.log("Video uploaded to:", videoUrl);
     console.log("Using AI prompt:", aiPrompt);
-    
+
     const result = await generateText({
-      model: 'xai/grok-3',
+      model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
       prompt: aiPrompt + `\nVideo URL: ${videoUrl}`,
     });
 
