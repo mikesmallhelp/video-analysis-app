@@ -24,33 +24,20 @@ export async function POST(request: NextRequest) {
     const aiPrompt =
       process.env.AI_PROMPT ||
       `
-Analyze this video and provide a detailed description of what you observe. 
-Focus on identifying key elements, actions, and any notable features or patterns.
-Provide your analysis in a clear, structured format.
+      Analyze this video and provide a detailed description of what you observe. 
+      Focus on identifying key elements, actions, and any notable features or patterns.
+      Provide your analysis in a clear, structured format.
     `.trim()
 
-    // Generate analysis using AI
+    console.log("Video uploaded to:", videoUrl);
+    console.log("Using AI prompt:", aiPrompt);
+    
     const result = await generateText({
-      model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
-      apiKey: process.env.AI_GATEWAY_API_KEY,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: aiPrompt,
-            },
-            {
-              type: 'image',
-              image: videoUrl,
-            },
-          ],
-        }
-      ],
-      maxTokens: 2000,
-    })
+      model: 'xai/grok-3',
+      prompt: aiPrompt + `\nVideo URL: ${videoUrl}`,
+    });
 
+    console.log("AI Analysis Result:", result.text);
     return NextResponse.json({ analysis: result.text })
   } catch (error) {
     console.error("Video analysis error:", error)
