@@ -32,6 +32,7 @@ Provide your analysis in a clear, structured format.
     // Generate analysis using AI
     const result = await generateText({
       model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
+      apiKey: process.env.AI_GATEWAY_API_KEY,
       messages: [
         {
           role: 'user',
