@@ -1,23 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
-
-// Initialize AI provider - this will be configurable via environment variables
-const getAIProvider = () => {
-  const provider = process.env.AI_PROVIDER || "openai"
-  const model = process.env.AI_MODEL || "gpt-4o"
-
-  switch (provider.toLowerCase()) {
-    case "openai":
-      return createOpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        baseURL:
-          process.env.AI_GATEWAY_URL || "https://gateway.ai.cloudflare.com/v1/YOUR_ACCOUNT_ID/YOUR_GATEWAY_ID/openai",
-      })(model)
-    default:
-      throw new Error(`Unsupported AI provider: ${provider}`)
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,10 +25,8 @@ Provide your analysis in a clear, structured format.
     `.trim()
 
     // Generate analysis using AI
-    const model = getAIProvider()
-
     const { text } = await generateText({
-      model,
+      model: `${process.env.AI_PROVIDER}/${process.env.AI_MODEL}`,
       messages: [
         {
           role: "user",
@@ -63,6 +43,8 @@ Provide your analysis in a clear, structured format.
         },
       ],
       maxTokens: 2000,
+      apiKey: process.env.AI_GATEWAY_API_KEY,
+      baseURL: process.env.AI_GATEWAY_URL,
     })
 
     return NextResponse.json({ analysis: text })
