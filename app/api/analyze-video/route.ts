@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { put } from '@vercel/blob'
+import { VertexAI } from '@google-cloud/vertexai'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,59 +32,47 @@ export async function POST(request: NextRequest) {
     console.log("Video uploaded to:", videoUrl);
     console.log("Using AI prompt:", aiPrompt);
 
-    // Use Vertex AI REST API directly
+    // Use Vertex AI Node.js library
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
     const model = process.env.VERTEX_AI_MODEL || 'gemini-1.5-flash'
-    const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS ? 
+    const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS ?
       JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS) : null
 
-    if (!projectId || !credentials) {
-      throw new Error('Google Cloud configuration missing')
+    if (!projectId) {
+      throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required')
     }
 
-    // Get access token (simplified - in production, use proper auth)
-    const { GoogleAuth } = await import('google-auth-library')
-    const auth = new GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    // Initialize Vertex AI
+    const vertexAI = new VertexAI({
+      project: projectId,
+      location: location,
+      ...(credentials && { keyFilename: undefined, credentials: credentials })
     })
-    
-    const client = await auth.getClient()
-    const accessToken = await client.getAccessToken()
 
-    // Make direct API call to Vertex AI
+    // Get the generative model
+    const generativeModel = vertexAI.getGenerativeModel({
+      model: model,
+    })
+
+    // Create the prompt with video URL
     const prompt = `${aiPrompt}\n\nPlease analyze this video: ${videoUrl}`
-    
-    const response = await fetch(
-      `https://${location}-aiplatform.googleapis.com/v1/projects/${projectId}/locations/${location}/publishers/google/models/${model}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          }
-        })
+
+    // Generate content
+    const result = await generativeModel.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 2048,
       }
-    )
+    })
 
-    if (!response.ok) {
-      throw new Error(`Vertex AI API error: ${response.status}`)
-    }
-
-    const result = await response.json()
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis generated'
+    const text = result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis generated'
 
     console.log("AI Analysis Result:", text);
     return NextResponse.json({ analysis: text })
