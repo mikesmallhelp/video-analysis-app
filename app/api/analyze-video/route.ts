@@ -31,11 +31,27 @@ export async function POST(request: NextRequest) {
     }
 
     // Construct credentials from environment variables
+    let privateKey = process.env.GOOGLE_CLOUD_PRIVATE_KEY
+    if (privateKey) {
+      // Handle different formats of newlines in the private key
+      privateKey = privateKey.replace(/\\n/g, '\n')
+      // Ensure proper formatting
+      if (!privateKey.includes('\n')) {
+        // If still no newlines, it might be base64 encoded or malformed
+        // Try to format it properly
+        privateKey = privateKey
+          .replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
+          .replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
+          .replace(/(.{64})/g, '$1\n')
+          .replace(/\n\n/g, '\n')
+      }
+    }
+
     const credentials = {
       type: "service_account",
       project_id: projectId,
       private_key_id: process.env.GOOGLE_CLOUD_PRIVATE_KEY_ID,
-      private_key: process.env.GOOGLE_CLOUD_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      private_key: privateKey,
       client_email: process.env.GOOGLE_CLOUD_CLIENT_EMAIL,
       client_id: process.env.GOOGLE_CLOUD_CLIENT_ID,
       auth_uri: "https://accounts.google.com/o/oauth2/auth",
