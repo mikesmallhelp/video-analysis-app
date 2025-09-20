@@ -51,15 +51,25 @@ export async function POST(request: NextRequest) {
       model: model,
     })
 
-    // Create the prompt with video URL
-    const prompt = `${aiPrompt}\n\nPlease analyze this video: ${videoUrl}`
+    // Fetch the video from the blob URL and convert to base64
+    const videoResponse = await fetch(videoUrl)
+    const videoBuffer = await videoResponse.arrayBuffer()
+    const videoBase64 = Buffer.from(videoBuffer).toString('base64')
 
-    // Generate content
+    // Generate content with video data
     const result = await generativeModel.generateContent({
       contents: [
         {
           role: 'user',
-          parts: [{ text: prompt }]
+          parts: [
+            { text: aiPrompt },
+            {
+              inlineData: {
+                mimeType: videoFile.type,
+                data: videoBase64
+              }
+            }
+          ]
         }
       ],
       generationConfig: {
