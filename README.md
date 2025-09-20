@@ -1,6 +1,6 @@
-# Video analysis app
+# Video Analysis App
 
-## An example application run
+## Example Application Screenshots
 
 ![](doc/ui-1.png)
 ![](doc/ui-2.png)
@@ -9,11 +9,11 @@
 
 ## Configuration
 
-You can configure the application title, guide and the AI prompt. So you can analyze different things from the videos.
+You can configure the application title, guide text, and AI prompt to analyze different aspects of videos.
 
-See the .env.example. Create your own .env file. It's include in the .gitignore, so the secrets don't go to the GitHub.
+Refer to `.env.example` and create your own `.env` file. This file is included in `.gitignore` to prevent secrets from being committed to GitHub.
 
-Create your Google cloud account, if you don't have it already. Configure also your Google Vertex AI environment variables in the .env file.
+Create a Google Cloud account if you don't have one already, and configure your Google Vertex AI environment variables in the `.env` file.
 
 You can use these commands to get your environment variables:
 
@@ -36,17 +36,17 @@ gcloud projects add-iam-policy-binding <your project id> --member="serviceAccoun
 ```
 gcloud iam service-accounts keys create ~/keys/<your filename>.json --iam-account=<your service account's email>
 ```
-Take the private key and other values from the json file.
+Extract the private key and other values from the generated JSON file.
 
-## The commands to run the application
+## Commands to Run the Application
 
 ```
 npm i
 npm run dev
 ```
 
-## Deploy to the Vercel platform
+## Deploy to Vercel
 
-The project is tested to run also in the Vercel platform. Please note that there is quite short timeout value with the hobby plan (about 10s). I figured out that 1s video is able to analyse there. Locally I tried the application without problems with the 16s video.
+This project has been tested to run on the Vercel platform. Note that the hobby plan has a short timeout (approximately 10 seconds). Testing shows that only 1 second long videos can be analyzed successfully on Vercel, while locally the application handles at least 15 seconds long videos without issues.
 
-Login to the Vercel platform with this url: https://vercel.com/login
+Log in to the Vercel platform at: https://vercel.com/login
