@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { put } from '@vercel/blob'
 import { VertexAI } from '@google-cloud/vertexai'
 
 export async function POST(request: NextRequest) {
@@ -11,15 +10,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No video file provided" }, { status: 400 })
     }
 
-    // Upload video to Vercel Blob
-    const blob = await put(videoFile.name, videoFile, {
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      addRandomSuffix: true,
-    })
-
-    const videoUrl = blob.url
-
     // Get AI prompt from environment variables
     const aiPrompt =
       process.env.AI_PROMPT ||
@@ -29,7 +19,7 @@ export async function POST(request: NextRequest) {
       Provide your analysis in a clear, structured format.
     `.trim()
 
-    console.log("Video uploaded to:", videoUrl);
+    console.log("Processing video file:", videoFile.name);
     console.log("Using AI prompt:", aiPrompt);
 
     // Use Vertex AI Node.js library
@@ -51,9 +41,8 @@ export async function POST(request: NextRequest) {
       model: model,
     })
 
-    // Fetch the video from the blob URL and convert to base64
-    const videoResponse = await fetch(videoUrl)
-    const videoBuffer = await videoResponse.arrayBuffer()
+    // Convert video file to base64
+    const videoBuffer = await videoFile.arrayBuffer()
     const videoBase64 = Buffer.from(videoBuffer).toString('base64')
 
     // Generate content with video data
