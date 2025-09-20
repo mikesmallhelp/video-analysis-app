@@ -36,9 +36,6 @@ export async function POST(request: NextRequest) {
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
     const model = process.env.VERTEX_AI_MODEL || 'gemini-1.5-flash'
-    const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS ?
-      JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS) : null
-
     if (!projectId) {
       throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required')
     }
@@ -47,7 +44,6 @@ export async function POST(request: NextRequest) {
     const vertexAI = new VertexAI({
       project: projectId,
       location: location,
-      ...(credentials && { keyFilename: undefined, credentials: credentials })
     })
 
     // Get the generative model
