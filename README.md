@@ -13,9 +13,9 @@ You can configure the application title, guide text, and AI prompt to analyze di
 
 The application uses the Google Vertex AI API. For more information, see these documents:
 
-https://cloud.google.com/vertex-ai
-https://cloud.google.com/vertex-ai/docs/authentication
-https://cloud.google.com/docs/authentication/application-default-credentials
+- https://cloud.google.com/vertex-ai
+- https://cloud.google.com/vertex-ai/docs/authentication
+- https://cloud.google.com/docs/authentication/application-default-credentials
 
 Refer to `.env.example` and create your own `.env` file. This file is included in `.gitignore` to prevent secrets from being committed to GitHub.
 
