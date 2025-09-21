@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     // Use Vertex AI Node.js library
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
     const location = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1'
-    const model = process.env.VERTEX_AI_MODEL || 'gemini-1.5-flash'
+    const model = process.env.VERTEX_AI_MODEL || 'gemini-2.5-pro'
     if (!projectId) {
       throw new Error('GOOGLE_CLOUD_PROJECT_ID environment variable is required')
     }
