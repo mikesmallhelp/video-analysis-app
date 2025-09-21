@@ -11,7 +11,7 @@
 
 You can configure the application title, guide text, and AI prompt to analyze different aspects of videos.
 
-The application uses the Google Vertex AI API. See more information from these documents:
+The application uses the Google Vertex AI API. For more information, see these documents:
 
 https://cloud.google.com/vertex-ai
 https://cloud.google.com/vertex-ai/docs/authentication
