@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       await fs.unlink(outputPath).catch(console.error)
 
       // Return the clipped video
-      return new NextResponse(clippedBuffer, {
+      return new NextResponse(new Uint8Array(clippedBuffer), {
         headers: {
           'Content-Type': 'video/mp4',
           'Content-Length': clippedBuffer.length.toString(),
