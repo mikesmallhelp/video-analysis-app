@@ -46,7 +46,7 @@ export default function VideoAnalysisApp() {
   const appTitle = process.env.NEXT_PUBLIC_APP_TITLE || "Video Analysis AI"
   const guideText = process.env.NEXT_PUBLIC_GUIDE_TEXT || "Upload a video and our AI will analyze it for you"
 
-  const clipVideo = async (timeRange: TimeRange, taskLabel: string): Promise<string | null> => {
+  const clipVideo = async (timeRange: TimeRange): Promise<string | null> => {
     if (!file) return null
 
     try {
@@ -70,39 +70,6 @@ export default function VideoAnalysisApp() {
     } catch (err) {
       console.error("Video clipping error:", err)
       return null
-    }
-  }
-
-  const clipAllVideos = async () => {
-    if (!analysisResult || !file) return
-
-    setIsClipping(true)
-    setError("")
-    const newClippedVideos: ClippedVideo[] = []
-
-    try {
-      for (const task of analysisResult.results) {
-        for (const timeRange of task.timeRanges) {
-          setClippingProgress(`Clipping ${task.label}: ${timeRange.originalText}`)
-
-          const url = await clipVideo(timeRange, task.label)
-          if (url) {
-            newClippedVideos.push({
-              url,
-              timeRange,
-              taskLabel: task.label
-            })
-          }
-        }
-      }
-
-      setClippedVideos(newClippedVideos)
-    } catch (err) {
-      setError("Failed to clip videos. Please try again.")
-      console.error("Video clipping error:", err)
-    } finally {
-      setIsClipping(false)
-      setClippingProgress("")
     }
   }
 
@@ -164,13 +131,14 @@ export default function VideoAnalysisApp() {
 
       // Automatically clip all found video segments
       if (result.results?.length > 0) {
+        setIsClipping(true)
         const newClippedVideos: ClippedVideo[] = []
 
         for (const task of result.results) {
           for (const timeRange of task.timeRanges) {
             setClippingProgress(`Clipping ${task.label}: ${timeRange.originalText}`)
 
-            const url = await clipVideo(timeRange, task.label)
+            const url = await clipVideo(timeRange)
             if (url) {
               newClippedVideos.push({
                 url,
@@ -183,6 +151,7 @@ export default function VideoAnalysisApp() {
 
         setClippedVideos(newClippedVideos)
         setClippingProgress("")
+        setIsClipping(false)
       }
     } catch (err) {
       setError("Failed to analyze video. Please try again.")
