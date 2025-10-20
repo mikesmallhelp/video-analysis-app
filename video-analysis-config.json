@@ -1,0 +1,14 @@
+{
+    "analyzes": [
+        {
+            "ui-label": "The person in the red shirt videos",
+            "ui-description": "Videos showing a person wearing a red shirt hitting a ball.",
+            "prompt": "The person in the red shirt is hitting the ball."
+        },
+        {
+            "ui-label": "The back wall videos",
+            "ui-description": "Videos showing the ball hitting the back wall.",
+            "prompt": "The ball hits the back wall."
+        }
+    ]
+}
