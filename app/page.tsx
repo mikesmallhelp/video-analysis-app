@@ -8,21 +8,70 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle } from "lucide-react"
 
+interface TimeRange {
+  start: number
+  end: number
+  originalText: string
+}
+
+interface AnalysisResult {
+  analysis: string
+  timeRange: TimeRange | null
+}
+
 export default function VideoAnalysisApp() {
   const [file, setFile] = useState<File | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string>("")
+  const [clippedVideoUrl, setClippedVideoUrl] = useState<string>("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysis, setAnalysis] = useState<string>("")
+  const [isClipping, setIsClipping] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [error, setError] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const appTitle = process.env.NEXT_PUBLIC_APP_TITLE || "Video Analysis AI"
   const guideText = process.env.NEXT_PUBLIC_GUIDE_TEXT || "Upload a video and our AI will analyze it for you"
 
+  const clipVideo = async (timeRange: TimeRange) => {
+    if (!file) return
+
+    setIsClipping(true)
+    setError("")
+
+    try {
+      const formData = new FormData()
+      formData.append("video", file)
+      formData.append("startTime", timeRange.start.toString())
+      formData.append("endTime", timeRange.end.toString())
+
+      const response = await fetch("/api/clip-video", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to clip video")
+      }
+
+      const clippedBlob = await response.blob()
+      const url = URL.createObjectURL(clippedBlob)
+      setClippedVideoUrl(url)
+    } catch (err) {
+      setError("Failed to clip video. Please try again.")
+      console.error("Video clipping error:", err)
+    } finally {
+      setIsClipping(false)
+    }
+  }
+
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type.startsWith("video/")) {
       setFile(selectedFile)
+      setVideoUrl(URL.createObjectURL(selectedFile))
+      setClippedVideoUrl("")
       setError("")
-      setAnalysis("")
+      setAnalysisResult(null)
     } else {
       setError("Please select a valid video file")
     }
@@ -67,7 +116,12 @@ export default function VideoAnalysisApp() {
       }
 
       const result = await response.json()
-      setAnalysis(result.analysis)
+      setAnalysisResult(result)
+
+      // If AI found a time range, automatically clip the video
+      if (result.timeRange) {
+        await clipVideo(result.timeRange)
+      }
     } catch (err) {
       setError("Failed to analyze video. Please try again.")
       console.error("Analysis error:", err)
@@ -77,8 +131,16 @@ export default function VideoAnalysisApp() {
   }
 
   const resetUpload = () => {
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl)
+    }
+    if (clippedVideoUrl) {
+      URL.revokeObjectURL(clippedVideoUrl)
+    }
     setFile(null)
-    setAnalysis("")
+    setVideoUrl("")
+    setClippedVideoUrl("")
+    setAnalysisResult(null)
     setError("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
@@ -137,11 +199,16 @@ export default function VideoAnalysisApp() {
                   </Button>
                 </div>
 
-                <Button onClick={analyzeVideo} disabled={isAnalyzing} className="w-full" size="lg">
+                <Button onClick={analyzeVideo} disabled={isAnalyzing || isClipping} className="w-full" size="lg">
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Analyzing Video...
+                    </>
+                  ) : isClipping ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Clipping Video...
                     </>
                   ) : (
                     <>
@@ -163,22 +230,82 @@ export default function VideoAnalysisApp() {
           </Alert>
         )}
 
-        {/* Analysis Results */}
-        {analysis && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                Analysis Results
-              </CardTitle>
-              <CardDescription>AI analysis of your video content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted p-6 rounded-lg">
-                <pre className="whitespace-pre-wrap text-sm text-foreground font-mono leading-relaxed">{analysis}</pre>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Video Player and Analysis Results */}
+        {analysisResult && (
+          <div className="space-y-6">
+            {/* Video Player */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileVideo className="h-5 w-5 text-primary" />
+                  {clippedVideoUrl ? "AI Extracted Scene" : isClipping ? "Processing Video..." : "Video Player"}
+                </CardTitle>
+                <CardDescription>
+                  {clippedVideoUrl
+                    ? `Showing only the AI-found scene: ${analysisResult.timeRange?.originalText || ""}`
+                    : isClipping
+                    ? `Clipping scene at ${analysisResult.timeRange?.originalText || ""}...`
+                    : analysisResult.timeRange
+                    ? `AI found the scene at ${analysisResult.timeRange.originalText}`
+                    : "Original uploaded video"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isClipping ? (
+                  <div className="flex flex-col items-center justify-center p-12 text-center">
+                    <Loader2 className="h-12 w-12 mb-4 animate-spin text-primary" />
+                    <p className="text-lg font-medium mb-2">Clipping video...</p>
+                    <p className="text-sm text-muted-foreground">Extracting AI-found scene</p>
+                  </div>
+                ) : (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={clippedVideoUrl || videoUrl}
+                      controls
+                      className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
+                      preload="metadata"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+
+                    {analysisResult.timeRange && (
+                      <div className="mt-4 text-center">
+                        <div className="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          {clippedVideoUrl
+                            ? `AI Scene Extracted: ${analysisResult.timeRange.originalText}`
+                            : `AI Scene: ${analysisResult.timeRange.originalText}`
+                          }
+                        </div>
+                        {clippedVideoUrl && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            This video contains only the scene identified by AI
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Analysis Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-primary" />
+                  Analysis Results
+                </CardTitle>
+                <CardDescription>AI analysis of your video content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-muted p-6 rounded-lg">
+                  <pre className="whitespace-pre-wrap text-sm text-foreground font-mono leading-relaxed">{analysisResult.analysis}</pre>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

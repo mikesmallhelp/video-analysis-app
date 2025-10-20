@@ -1,6 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { VertexAI } from '@google-cloud/vertexai'
 
+// Helper function to convert time format "m:ss" to seconds
+function parseTimeToSeconds(timeStr: string): number {
+  const [minutes, seconds] = timeStr.split(':').map(Number)
+  return minutes * 60 + seconds
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -69,8 +75,28 @@ export async function POST(request: NextRequest) {
 
     const text = result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis generated'
 
+    // Extract time range from AI response (format: minutes:seconds-minutes:seconds)
+    const timeRangeMatch = text.match(/(\d+:\d+)-(\d+:\d+)/)
+    let startTime = null
+    let endTime = null
+
+    if (timeRangeMatch) {
+      const [, start, end] = timeRangeMatch
+      startTime = parseTimeToSeconds(start)
+      endTime = parseTimeToSeconds(end)
+    }
+
     console.log("AI Analysis Result:", text);
-    return NextResponse.json({ analysis: text })
+    console.log("Extracted time range:", { startTime, endTime });
+
+    return NextResponse.json({
+      analysis: text,
+      timeRange: timeRangeMatch ? {
+        start: startTime,
+        end: endTime,
+        originalText: timeRangeMatch[0]
+      } : null
+    })
   } catch (error) {
     console.error("Video analysis error:", error)
     return NextResponse.json({ 
