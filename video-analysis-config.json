@@ -1,14 +1,16 @@
 {
+    "app-title": "AI object recognition application",
+    "guide-text": "Upload a video, and the AI will find the clips containing a paperclip or a tape roll.",
     "analyzes": [
         {
-            "ui-label": "The person in the red shirt videos",
-            "ui-description": "Videos showing a person wearing a red shirt hitting a ball.",
-            "prompt": "The person in the red shirt is hitting the ball."
+            "ui-label": "The paperclip videos",
+            "ui-description": "The paperclip is visible in these videos.",
+            "prompt": "The paperclip is visible in the video."
         },
         {
-            "ui-label": "The back wall videos",
-            "ui-description": "Videos showing the ball hitting the back wall.",
-            "prompt": "The ball hits the back wall."
+            "ui-label": "The tape roll videos",
+            "ui-description": "The tape roll is visible in these videos.",
+            "prompt": "The tape roll is visible in the video."
         }
     ]
 }

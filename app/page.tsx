@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import config from "@/video-analysis-config.json"
 
 interface TimeRange {
   start: number
@@ -43,8 +44,8 @@ export default function VideoAnalysisApp() {
   const [error, setError] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const appTitle = process.env.NEXT_PUBLIC_APP_TITLE || "Video Analysis AI"
-  const guideText = process.env.NEXT_PUBLIC_GUIDE_TEXT || "Upload a video and our AI will analyze it for you"
+  const appTitle = config["app-title"] || "Video Analysis AI"
+  const guideText = config["guide-text"] || "Upload a video and our AI will analyze it for you"
 
   const clipVideo = async (timeRange: TimeRange): Promise<string | null> => {
     if (!file) return null
@@ -287,7 +288,15 @@ export default function VideoAnalysisApp() {
                             src={clippedVideo.url}
                             controls
                             className="w-full rounded-lg shadow-lg"
-                            preload="metadata"
+                            preload="none"
+                            playsInline
+                            onError={(e) => {
+                              const video = e.currentTarget
+                              if (video.error?.code === MediaError.MEDIA_ERR_ABORTED) {
+                                // Ignore abort errors as they're usually from user navigation
+                                console.log("Video load aborted (normal behavior)")
+                              }
+                            }}
                           >
                             Your browser does not support the video tag.
                           </video>
