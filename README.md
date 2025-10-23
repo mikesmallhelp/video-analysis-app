@@ -11,7 +11,7 @@ The video analysis application extracts desired clips from a video. You can conf
 
 ## Configuration
 
-In the video-analysis-config.json file, you can configure the application title, guide text, AI prompts, and more.
+In the `video-analysis-config.json` file, you can configure the application title, guide text, AI prompts, and more.
 
 The application uses the Google Vertex AI API. For more information, see these documents:
 
