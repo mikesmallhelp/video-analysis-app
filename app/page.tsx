@@ -7,22 +7,83 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import config from "@/video-analysis-config.json"
+
+interface TimeRange {
+  start: number
+  end: number
+  originalText: string
+}
+
+interface AnalysisTask {
+  label: string
+  description: string
+  prompt: string
+  analysis: string
+  timeRanges: TimeRange[]
+}
+
+interface AnalysisResult {
+  results: AnalysisTask[]
+}
+
+interface ClippedVideo {
+  url: string
+  timeRange: TimeRange
+  taskLabel: string
+}
 
 export default function VideoAnalysisApp() {
   const [file, setFile] = useState<File | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string>("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysis, setAnalysis] = useState<string>("")
+  const [isClipping, setIsClipping] = useState(false)
+  const [clippingProgress, setClippingProgress] = useState<string>("")
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
+  const [clippedVideos, setClippedVideos] = useState<ClippedVideo[]>([])
   const [error, setError] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const appTitle = process.env.NEXT_PUBLIC_APP_TITLE || "Video Analysis AI"
-  const guideText = process.env.NEXT_PUBLIC_GUIDE_TEXT || "Upload a video and our AI will analyze it for you"
+  const appTitle = config["app-title"] || "Video Analysis AI"
+  const guideText = config["guide-text"] || "Upload a video and our AI will analyze it for you"
+
+  const clipVideo = async (timeRange: TimeRange): Promise<string | null> => {
+    if (!file) return null
+
+    try {
+      const formData = new FormData()
+      formData.append("video", file)
+      formData.append("startTime", timeRange.start.toString())
+      formData.append("endTime", timeRange.end.toString())
+
+      const response = await fetch("/api/clip-video", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to clip video")
+      }
+
+      const clippedBlob = await response.blob()
+      const url = URL.createObjectURL(clippedBlob)
+      return url
+    } catch (err) {
+      console.error("Video clipping error:", err)
+      return null
+    }
+  }
 
   const handleFileSelect = (selectedFile: File) => {
     if (selectedFile.type.startsWith("video/")) {
+      // Clean up previous video URLs
+      clippedVideos.forEach(video => URL.revokeObjectURL(video.url))
+
       setFile(selectedFile)
+      setVideoUrl(URL.createObjectURL(selectedFile))
+      setClippedVideos([])
       setError("")
-      setAnalysis("")
+      setAnalysisResult(null)
     } else {
       setError("Please select a valid video file")
     }
@@ -67,7 +128,32 @@ export default function VideoAnalysisApp() {
       }
 
       const result = await response.json()
-      setAnalysis(result.analysis)
+      setAnalysisResult(result)
+
+      // Automatically clip all found video segments
+      if (result.results?.length > 0) {
+        setIsClipping(true)
+        const newClippedVideos: ClippedVideo[] = []
+
+        for (const task of result.results) {
+          for (const timeRange of task.timeRanges) {
+            setClippingProgress(`Clipping ${task.label}: ${timeRange.originalText}`)
+
+            const url = await clipVideo(timeRange)
+            if (url) {
+              newClippedVideos.push({
+                url,
+                timeRange,
+                taskLabel: task.label
+              })
+            }
+          }
+        }
+
+        setClippedVideos(newClippedVideos)
+        setClippingProgress("")
+        setIsClipping(false)
+      }
     } catch (err) {
       setError("Failed to analyze video. Please try again.")
       console.error("Analysis error:", err)
@@ -77,8 +163,15 @@ export default function VideoAnalysisApp() {
   }
 
   const resetUpload = () => {
+    if (videoUrl) {
+      URL.revokeObjectURL(videoUrl)
+    }
+    clippedVideos.forEach(video => URL.revokeObjectURL(video.url))
+
     setFile(null)
-    setAnalysis("")
+    setVideoUrl("")
+    setClippedVideos([])
+    setAnalysisResult(null)
     setError("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
@@ -137,11 +230,16 @@ export default function VideoAnalysisApp() {
                   </Button>
                 </div>
 
-                <Button onClick={analyzeVideo} disabled={isAnalyzing} className="w-full" size="lg">
+                <Button onClick={analyzeVideo} disabled={isAnalyzing || isClipping} className="w-full" size="lg">
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Analyzing Video...
+                    </>
+                  ) : isClipping ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      {clippingProgress || "Clipping Videos..."}
                     </>
                   ) : (
                     <>
@@ -163,19 +261,85 @@ export default function VideoAnalysisApp() {
           </Alert>
         )}
 
-        {/* Analysis Results */}
-        {analysis && (
+        {/* Video Clips by Category */}
+        {clippedVideos.length > 0 && (
+          <div className="space-y-6">
+            {analysisResult?.results.map((task, taskIndex) => {
+              const taskVideos = clippedVideos.filter(video => video.taskLabel === task.label)
+
+              if (taskVideos.length === 0) return null
+
+              return (
+                <Card key={taskIndex}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileVideo className="h-5 w-5 text-primary" />
+                      {task.label}
+                    </CardTitle>
+                    <CardDescription>
+                      {task.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {taskVideos.map((clippedVideo, videoIndex) => (
+                        <div key={videoIndex} className="space-y-2">
+                          <video
+                            src={clippedVideo.url}
+                            controls
+                            className="w-full rounded-lg shadow-lg"
+                            preload="auto"
+                            playsInline
+                            onLoadedMetadata={(e) => {
+                              // Force Firefox to buffer more data
+                              const video = e.currentTarget
+                              if (video.buffered.length === 0) {
+                                // Trigger buffering by setting currentTime
+                                video.currentTime = 0.01
+                              }
+                            }}
+                            onError={(e) => {
+                              const video = e.currentTarget
+                              if (video.error?.code === MediaError.MEDIA_ERR_ABORTED) {
+                                // Ignore abort errors as they're usually from user navigation
+                                console.log("Video load aborted (normal behavior)")
+                              }
+                            }}
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                          <div className="text-center">
+                            <span className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                              {clippedVideo.timeRange.originalText}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Processing State */}
+        {isClipping && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                Analysis Results
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                Processing Videos
               </CardTitle>
-              <CardDescription>AI analysis of your video content</CardDescription>
+              <CardDescription>
+                {clippingProgress || "Extracting AI-found scenes..."}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-muted p-6 rounded-lg">
-                <pre className="whitespace-pre-wrap text-sm text-foreground font-mono leading-relaxed">{analysis}</pre>
+              <div className="flex flex-col items-center justify-center p-8 text-center">
+                <Loader2 className="h-12 w-12 mb-4 animate-spin text-primary" />
+                <p className="text-lg font-medium mb-2">Clipping videos...</p>
+                <p className="text-sm text-muted-foreground">This may take several moments</p>
               </div>
             </CardContent>
           </Card>
