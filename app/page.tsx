@@ -288,7 +288,7 @@ export default function VideoAnalysisApp() {
                             src={clippedVideo.url}
                             controls
                             className="w-full rounded-lg shadow-lg"
-                            preload="none"
+                            preload="metadata"
                             playsInline
                             onError={(e) => {
                               const video = e.currentTarget
