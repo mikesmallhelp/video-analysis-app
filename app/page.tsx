@@ -288,8 +288,16 @@ export default function VideoAnalysisApp() {
                             src={clippedVideo.url}
                             controls
                             className="w-full rounded-lg shadow-lg"
-                            preload="metadata"
+                            preload="auto"
                             playsInline
+                            onLoadedMetadata={(e) => {
+                              // Force Firefox to buffer more data
+                              const video = e.currentTarget
+                              if (video.buffered.length === 0) {
+                                // Trigger buffering by setting currentTime
+                                video.currentTime = 0.01
+                              }
+                            }}
                             onError={(e) => {
                               const video = e.currentTarget
                               if (video.error?.code === MediaError.MEDIA_ERR_ABORTED) {
