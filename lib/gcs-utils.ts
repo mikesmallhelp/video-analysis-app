@@ -1,5 +1,4 @@
 import { Storage } from '@google-cloud/storage'
-import path from 'path'
 
 // Initialize Google Cloud Storage client
 const storage = new Storage({

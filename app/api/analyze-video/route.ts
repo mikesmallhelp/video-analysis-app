@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { VertexAI } from '@google-cloud/vertexai'
 import { promises as fs } from 'fs'
 import path from 'path'
-import { uploadVideoToGCS, deleteVideoFromGCS, ensureBucketExists } from '@/lib/gcs-utils'
+import { uploadVideoToGCS, deleteVideoFromGCS } from '@/lib/gcs-utils'
 
 // Helper function to convert time format "m:ss" to seconds
 function parseTimeToSeconds(timeStr: string): number {
