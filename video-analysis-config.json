@@ -1,6 +1,7 @@
 {
     "app-title": "AI object recognition application",
     "guide-text": "Upload a video, and the AI will find the clips containing a paperclip or a tape roll.",
+    "prompt-start": "Find objects in videos.",
     "analyzes": [
         {
             "ui-label": "The paperclip videos",
