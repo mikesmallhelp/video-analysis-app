@@ -71,8 +71,6 @@ export async function POST(request: NextRequest) {
     const videoBufferNode = Buffer.from(videoBuffer)
     gcsUri = await uploadVideoToGCS(videoBufferNode, videoFile.name, videoFile.type)
 
-    console.log(`Video uploaded to GCS: ${gcsUri}`)
-
     // Process all analysis tasks
     const analysisResults = []
 
