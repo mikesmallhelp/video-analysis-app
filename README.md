@@ -1,6 +1,6 @@
 # Video Analysis Application
 
-The video analysis application extracts desired clips from a video. You can configure which clips to select.
+This application uses AI to analyze videos and extract relevant clips based on configurable criteria. The system intelligently identifies and extracts video segments that match your specified requirements.
 
 ## Example Application Screenshots
 
@@ -11,27 +11,27 @@ The video analysis application extracts desired clips from a video. You can conf
 
 ## Configuration
 
-In the `video-analysis-config.json` file, you can configure the application title, guide text, AI prompts, and more.
+Configure the application settings in the `video-analysis-config.json` file, including the application title, guide text, AI prompts, and other parameters.
 
-The application uses the Google Vertex AI API. For more information, see these documents:
+This application uses the Google Vertex AI API. For detailed information, refer to the following documentation:
 
 - https://cloud.google.com/vertex-ai
 - https://cloud.google.com/vertex-ai/docs/authentication
 - https://cloud.google.com/docs/authentication/application-default-credentials
 
-Refer to `.env.example` and create your own `.env` file. This file is included in `.gitignore` to prevent secrets from being committed to GitHub.
+Create your own `.env` file based on the `.env.example` template.
 
-## Commands to configure Vertex AI usage
+## Setting Up Vertex AI
 
-Create first you your account to the Google services in the page https://cloud.google.com/vertex-ai.
+First, create your Google Cloud account at https://cloud.google.com/vertex-ai.
 
-Then in the console, login to the service
+Next, authenticate with the Google Cloud CLI:
 
 ```
 gcloud auth login
 ```
 
-Create the Google Cloud Storage bucket:
+Create a Google Cloud Storage bucket:
 
 ```
 gcloud storage buckets create gs://<your GCS bucket name> \
@@ -39,13 +39,13 @@ gcloud storage buckets create gs://<your GCS bucket name> \
     --uniform-bucket-level-access
 ```
 
-Create the service account:
+Create a service account for the application:
 
 ```
 gcloud iam service-accounts create <your service account name> --display-name="<your service account display name>"
 ```
 
-Create the Vertex AI access rights: 
+Grant Vertex AI permissions to the service account: 
 
 ```
 gcloud projects add-iam-policy-binding <your project name> \
@@ -53,7 +53,7 @@ gcloud projects add-iam-policy-binding <your project name> \
    --role="roles/aiplatform.user"
 ```
 
-Create the Google Cloud Storage bucket access rights:
+Grant Cloud Storage permissions to the service account:
 
 ```
 gcloud storage buckets add-iam-policy-binding gs://<your GCS bucket name> \
@@ -64,14 +64,16 @@ gcloud storage buckets add-iam-policy-binding gs://<your GCS bucket name> \
     --role="roles/storage.legacyBucketReader"
 ```
 
-Create your credentials json file:
+Generate a service account key file:
 
 ```
 gcloud iam service-accounts keys create ~/keys/<your credentials json file name>.json \
    --iam-account=<your service account name>@<your project name>.iam.gserviceaccount.com
 ```
 
-## Commands to Run the Application
+## Running the Application
+
+Install dependencies and start the development server:
 
 ```
 npm i
