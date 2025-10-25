@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { VertexAI } from '@google-cloud/vertexai'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { uploadVideoToGCS, deleteVideoFromGCS, ensureBucketExists } from '@/lib/gcs-utils'
 
 // Helper function to convert time format "m:ss" to seconds
 function parseTimeToSeconds(timeStr: string): number {
@@ -28,6 +29,8 @@ function extractTimeRanges(text: string): Array<{start: number, end: number, ori
 }
 
 export async function POST(request: NextRequest) {
+  let gcsUri: string | null = null
+
   try {
     const formData = await request.formData()
     const videoFile = formData.get("video") as File
@@ -63,9 +66,12 @@ export async function POST(request: NextRequest) {
       model: model,
     })
 
-    // Convert video file to base64
+    // Upload video to Google Cloud Storage
     const videoBuffer = await videoFile.arrayBuffer()
-    const videoBase64 = Buffer.from(videoBuffer).toString('base64')
+    const videoBufferNode = Buffer.from(videoBuffer)
+    gcsUri = await uploadVideoToGCS(videoBufferNode, videoFile.name, videoFile.type)
+
+    console.log(`Video uploaded to GCS: ${gcsUri}`)
 
     // Process all analysis tasks
     const analysisResults = []
@@ -77,7 +83,7 @@ export async function POST(request: NextRequest) {
       console.log(`Using prompt: ${aiPrompt}`)
 
       try {
-        // Generate content with video data
+        // Generate content with video from GCS
         const result = await generativeModel.generateContent({
           contents: [
             {
@@ -85,9 +91,9 @@ export async function POST(request: NextRequest) {
               parts: [
                 { text: aiPrompt },
                 {
-                  inlineData: {
+                  fileData: {
                     mimeType: videoFile.type,
-                    data: videoBase64
+                    fileUri: gcsUri
                   }
                 }
               ]
@@ -124,13 +130,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Clean up: delete video from GCS after analysis
+    if (gcsUri) {
+      await deleteVideoFromGCS(gcsUri)
+    }
+
     return NextResponse.json({
       results: analysisResults
     })
   } catch (error) {
     console.error("Video analysis error:", error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : "Failed to analyze video" 
+
+    // Clean up: delete video from GCS even if analysis failed
+    if (gcsUri) {
+      await deleteVideoFromGCS(gcsUri)
+    }
+
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : "Failed to analyze video"
     }, { status: 500 })
   }
 }
