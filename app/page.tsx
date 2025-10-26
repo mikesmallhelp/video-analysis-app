@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, FileVideo, Loader2, CheckCircle, AlertCircle } from "lucide-react"
-import config from "@/video-analysis-config.json"
+import { useTranslations } from "next-intl"
 
 interface TimeRange {
   start: number
@@ -34,6 +34,7 @@ interface ClippedVideo {
 }
 
 export default function VideoAnalysisApp() {
+  const t = useTranslations()
   const [file, setFile] = useState<File | null>(null)
   const [videoUrl, setVideoUrl] = useState<string>("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -44,8 +45,8 @@ export default function VideoAnalysisApp() {
   const [error, setError] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const appTitle = config["app-title"] || "Video Analysis AI"
-  const guideText = config["guide-text"] || "Upload a video and our AI will analyze it for you"
+  const appTitle = t('app.title')
+  const guideText = t('app.guideText')
 
   const clipVideo = async (timeRange: TimeRange): Promise<string | null> => {
     if (!file) return null
@@ -85,7 +86,7 @@ export default function VideoAnalysisApp() {
       setError("")
       setAnalysisResult(null)
     } else {
-      setError("Please select a valid video file")
+      setError(t('errors.invalidFile'))
     }
   }
 
@@ -137,7 +138,7 @@ export default function VideoAnalysisApp() {
 
         for (const task of result.results) {
           for (const timeRange of task.timeRanges) {
-            setClippingProgress(`Clipping ${task.label}: ${timeRange.originalText}`)
+            setClippingProgress(`${t('upload.clipping')} ${task.label}: ${timeRange.originalText}`)
 
             const url = await clipVideo(timeRange)
             if (url) {
@@ -155,7 +156,7 @@ export default function VideoAnalysisApp() {
         setIsClipping(false)
       }
     } catch (err) {
-      setError("Failed to analyze video. Please try again.")
+      setError(t('errors.analysisFailed'))
       console.error("Analysis error:", err)
     } finally {
       setIsAnalyzing(false)
@@ -192,9 +193,9 @@ export default function VideoAnalysisApp() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileVideo className="h-5 w-5" />
-              Upload Video
+              {t('upload.title')}
             </CardTitle>
-            <CardDescription>Select or drag and drop a video file to analyze</CardDescription>
+            <CardDescription>{t('upload.description')}</CardDescription>
           </CardHeader>
           <CardContent>
             {!file ? (
@@ -205,8 +206,8 @@ export default function VideoAnalysisApp() {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium text-foreground mb-2">Drop your video here or click to browse</p>
-                <p className="text-sm text-muted-foreground">Supports MP4, MOV, AVI and other video formats</p>
+                <p className="text-lg font-medium text-foreground mb-2">{t('upload.dropHere')}</p>
+                <p className="text-sm text-muted-foreground">{t('upload.supportedFormats')}</p>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -222,11 +223,11 @@ export default function VideoAnalysisApp() {
                     <FileVideo className="h-8 w-8 text-primary" />
                     <div>
                       <p className="font-medium text-foreground">{file.name}</p>
-                      <p className="text-sm text-muted-foreground">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                      <p className="text-sm text-muted-foreground">{t('video.fileSize', { size: (file.size / (1024 * 1024)).toFixed(2) })}</p>
                     </div>
                   </div>
                   <Button variant="outline" onClick={resetUpload}>
-                    Remove
+                    {t('upload.remove')}
                   </Button>
                 </div>
 
@@ -234,17 +235,17 @@ export default function VideoAnalysisApp() {
                   {isAnalyzing ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Analyzing Video...
+                      {t('upload.analyzing')}
                     </>
                   ) : isClipping ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      {clippingProgress || "Clipping Videos..."}
+                      {clippingProgress || t('upload.clipping')}
                     </>
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2" />
-                      Analyze Video
+                      {t('upload.analyzeButton')}
                     </>
                   )}
                 </Button>
@@ -306,7 +307,7 @@ export default function VideoAnalysisApp() {
                               }
                             }}
                           >
-                            Your browser does not support the video tag.
+                            {t('video.browserNotSupported')}
                           </video>
                           <div className="text-center">
                             <span className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
@@ -329,17 +330,17 @@ export default function VideoAnalysisApp() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                Processing Videos
+                {t('processing.title')}
               </CardTitle>
               <CardDescription>
-                {clippingProgress || "Extracting AI-found scenes..."}
+                {clippingProgress || t('processing.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center justify-center p-8 text-center">
                 <Loader2 className="h-12 w-12 mb-4 animate-spin text-primary" />
-                <p className="text-lg font-medium mb-2">Clipping videos...</p>
-                <p className="text-sm text-muted-foreground">This may take several moments</p>
+                <p className="text-lg font-medium mb-2">{t('processing.clippingVideos')}</p>
+                <p className="text-sm text-muted-foreground">{t('processing.takesTime')}</p>
               </div>
             </CardContent>
           </Card>

@@ -39,13 +39,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No video file provided" }, { status: 400 })
     }
 
-    // Read configuration file
-    const configPath = path.join(process.cwd(), 'video-analysis-config.json')
-    const configData = await fs.readFile(configPath, 'utf8')
-    const config = JSON.parse(configData)
+    // Load translations based on locale from environment
+    const locale = process.env.DEFAULT_LOCALE || 'en'
+    const messagesPath = path.join(process.cwd(), `messages/${locale}.json`)
+    const messagesData = await fs.readFile(messagesPath, 'utf8')
+    const messages = JSON.parse(messagesData)
 
     console.log("Processing video file:", videoFile.name);
-    console.log("Configuration loaded:", config.analyzes.length, "analysis tasks");
+    console.log("Configuration loaded:", messages.analyzes.length, "analysis tasks");
 
     // Use Vertex AI Node.js library
     const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID
@@ -74,24 +75,24 @@ export async function POST(request: NextRequest) {
     // Process all analysis tasks
     const analysisResults = []
 
-    for (const task of config.analyzes) {
-      const aiPromptStart = config["prompt-start"]
-      const aiPromptMiddle = task["prompt-middle"]
-      const aiPromptEnd = config["prompt-end"]
+    for (const task of messages.analyzes) {
+      const aiPromptStart = messages.prompts.start
+      const aiPromptMiddle = task.promptMiddle
+      const aiPromptEnd = messages.prompts.end
 
       if (!aiPromptStart || aiPromptStart.trim() === "") {
-        throw new Error('Configuration error: "prompt-start" is required and cannot be empty')
+        throw new Error('Configuration error: "prompts.start" is required and cannot be empty')
       }
       if (!aiPromptMiddle || aiPromptMiddle.trim() === "") {
-        throw new Error(`Configuration error: "prompt-middle" is required and cannot be empty for task "${task["ui-label"]}"`)
+        throw new Error(`Configuration error: "promptMiddle" is required and cannot be empty for task "${task.label}"`)
       }
       if (!aiPromptEnd || aiPromptEnd.trim() === "") {
-        throw new Error('Configuration error: "prompt-end" is required and cannot be empty')
+        throw new Error('Configuration error: "prompts.end" is required and cannot be empty')
       }
 
       const aiPrompt = `${aiPromptStart} ${aiPromptMiddle} ${aiPromptEnd}`
 
-      console.log(`Processing task: ${task["ui-label"]}`)
+      console.log(`Processing task: ${task.label}`)
       console.log(`Using prompt: ${aiPrompt}`)
 
       try {
@@ -120,22 +121,22 @@ export async function POST(request: NextRequest) {
         const text = result.response.candidates?.[0]?.content?.parts?.[0]?.text || 'No analysis generated'
         const timeRanges = extractTimeRanges(text)
 
-        console.log(`AI Result for ${task["ui-label"]}:`, text)
+        console.log(`AI Result for ${task.label}:`, text)
         console.log(`Extracted ${timeRanges.length} time ranges:`, timeRanges)
 
         analysisResults.push({
-          label: task["ui-label"],
-          description: task["ui-description"] || "",
-          prompt: task["prompt-middle"],
+          label: task.label,
+          description: task.description || "",
+          prompt: task.promptMiddle,
           analysis: text,
           timeRanges: timeRanges
         })
       } catch (error) {
-        console.error(`Error processing task ${task["ui-label"]}:`, error)
+        console.error(`Error processing task ${task.label}:`, error)
         analysisResults.push({
-          label: task["ui-label"],
-          description: task["ui-description"] || "",
-          prompt: task["prompt-middle"],
+          label: task.label,
+          description: task.description || "",
+          prompt: task.promptMiddle,
           analysis: `Error: ${error instanceof Error ? error.message : 'Failed to analyze'}`,
           timeRanges: []
         })

@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "AI-esineidentunnistussovellus",
+    "guideText": "Lataa video ja tekoäly löytää siitä klipit, jotka sisältävät paperiliittimen tai teippirullan."
+  },
+  "upload": {
+    "title": "Lataa video",
+    "description": "Valitse tai vedä ja pudota videotiedosto analysoitavaksi",
+    "dropHere": "Pudota video tähän tai klikkaa selataksesi",
+    "supportedFormats": "Tukee MP4, MOV, AVI ja muita videoformaatteja",
+    "remove": "Poista",
+    "analyzing": "Analysoidaan videota...",
+    "clipping": "Leikataan videoita...",
+    "analyzeButton": "Analysoi video"
+  },
+  "errors": {
+    "invalidFile": "Valitse kelvollinen videotiedosto",
+    "analysisFailed": "Videon analysointi epäonnistui. Yritä uudelleen.",
+    "clipFailed": "Videon leikkaus epäonnistui"
+  },
+  "processing": {
+    "title": "Käsitellään videoita",
+    "description": "Poimitaan tekoälyn löytämiä kohtauksia...",
+    "clippingVideos": "Leikataan videoita...",
+    "takesTime": "Tämä voi kestää hetken"
+  },
+  "video": {
+    "fileSize": "{size} Mt",
+    "browserNotSupported": "Selaimesi ei tue video-elementtiä."
+  },
+  "prompts": {
+    "start": "Poimi videosta kaikki kohtaukset, jotka vastaavat kuvausta:",
+    "end": "Vastaa vain kunkin kohtauksen alku- ja loppuajoilla muodossa: minuutit:sekunnit-minuutit:sekunnit. Listaa useita aikavälejä, jos vastaavia kohtauksia on useita. Esimerkiksi: 0:30-0:33, 1:15-1:18, 2:45-2:50."
+  },
+  "analyzes": [
+    {
+      "label": "Paperiliitinvideot",
+      "description": "Paperiliitin näkyy näissä videoissa.",
+      "promptMiddle": "Paperilitin näkyy videossa."
+    },
+    {
+      "label": "Teippirullavideot",
+      "description": "Teippirulla näkyy näissä videoissa.",
+      "promptMiddle": "Teippirulla näkyy videossa."
+    }
+  ]
+}

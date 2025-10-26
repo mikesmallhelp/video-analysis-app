@@ -1,0 +1,47 @@
+{
+  "app": {
+    "title": "AI object recognition application",
+    "guideText": "Upload a video, and the AI will find the clips containing a paperclip or a tape roll."
+  },
+  "upload": {
+    "title": "Upload Video",
+    "description": "Select or drag and drop a video file to analyze",
+    "dropHere": "Drop your video here or click to browse",
+    "supportedFormats": "Supports MP4, MOV, AVI and other video formats",
+    "remove": "Remove",
+    "analyzing": "Analyzing Video...",
+    "clipping": "Clipping Videos...",
+    "analyzeButton": "Analyze Video"
+  },
+  "errors": {
+    "invalidFile": "Please select a valid video file",
+    "analysisFailed": "Failed to analyze video. Please try again.",
+    "clipFailed": "Failed to clip video"
+  },
+  "processing": {
+    "title": "Processing Videos",
+    "description": "Extracting AI-found scenes...",
+    "clippingVideos": "Clipping videos...",
+    "takesTime": "This may take several moments"
+  },
+  "video": {
+    "fileSize": "{size} MB",
+    "browserNotSupported": "Your browser does not support the video tag."
+  },
+  "prompts": {
+    "start": "Extract from the video all scenes that match the description:",
+    "end": "Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50."
+  },
+  "analyzes": [
+    {
+      "label": "The paperclip videos",
+      "description": "The paperclip is visible in these videos.",
+      "promptMiddle": "The paperclip is visible in the video."
+    },
+    {
+      "label": "The tape roll videos",
+      "description": "The tape roll is visible in these videos.",
+      "promptMiddle": "The tape roll is visible in the video."
+    }
+  ]
+}

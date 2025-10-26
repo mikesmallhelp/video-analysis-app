@@ -11,7 +11,7 @@ This application uses AI to analyze videos and extract relevant clips based on c
 
 ## Configuration
 
-Configure the application settings in the `video-analysis-config.json` file, including the application title, guide text, AI prompts, and other parameters.
+The application supports multiple languages through internationalization (i18n). UI texts and AI prompts are configured in language files located in the `messages/` directory.
 
 This application uses the Google Vertex AI API. For detailed information, refer to the following documentation:
 
