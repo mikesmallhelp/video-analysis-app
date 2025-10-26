@@ -1,17 +1,18 @@
 {
     "app-title": "AI object recognition application",
     "guide-text": "Upload a video, and the AI will find the clips containing a paperclip or a tape roll.",
-    "prompt-start": "Find objects in videos.",
+    "prompt-start": "Extract from the video all scenes that match the description:",
     "analyzes": [
         {
             "ui-label": "The paperclip videos",
             "ui-description": "The paperclip is visible in these videos.",
-            "prompt": "The paperclip is visible in the video."
+            "prompt-middle": "The paperclip is visible in the video."
         },
         {
             "ui-label": "The tape roll videos",
             "ui-description": "The tape roll is visible in these videos.",
-            "prompt": "The tape roll is visible in the video."
+            "prompt-middle": "The tape roll is visible in the video."
         }
-    ]
+    ],
+    "prompt-end": "Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50."
 }

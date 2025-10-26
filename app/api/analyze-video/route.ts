@@ -75,8 +75,21 @@ export async function POST(request: NextRequest) {
     const analysisResults = []
 
     for (const task of config.analyzes) {
-      const aiPromptStart = config["prompt-start"] || "";
-      const aiPrompt = `Extract from the video all scenes that match the description: ${aiPromptStart} ${task.prompt} Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50`
+      const aiPromptStart = config["prompt-start"]
+      const aiPromptMiddle = task["prompt-middle"]
+      const aiPromptEnd = config["prompt-end"]
+
+      if (!aiPromptStart || aiPromptStart.trim() === "") {
+        throw new Error('Configuration error: "prompt-start" is required and cannot be empty')
+      }
+      if (!aiPromptMiddle || aiPromptMiddle.trim() === "") {
+        throw new Error(`Configuration error: "prompt-middle" is required and cannot be empty for task "${task["ui-label"]}"`)
+      }
+      if (!aiPromptEnd || aiPromptEnd.trim() === "") {
+        throw new Error('Configuration error: "prompt-end" is required and cannot be empty')
+      }
+
+      const aiPrompt = `${aiPromptStart} ${aiPromptMiddle} ${aiPromptEnd}`
 
       console.log(`Processing task: ${task["ui-label"]}`)
       console.log(`Using prompt: ${aiPrompt}`)
@@ -113,7 +126,7 @@ export async function POST(request: NextRequest) {
         analysisResults.push({
           label: task["ui-label"],
           description: task["ui-description"] || "",
-          prompt: task.prompt,
+          prompt: task["prompt-middle"],
           analysis: text,
           timeRanges: timeRanges
         })
@@ -122,7 +135,7 @@ export async function POST(request: NextRequest) {
         analysisResults.push({
           label: task["ui-label"],
           description: task["ui-description"] || "",
-          prompt: task.prompt,
+          prompt: task["prompt-middle"],
           analysis: `Error: ${error instanceof Error ? error.message : 'Failed to analyze'}`,
           timeRanges: []
         })
