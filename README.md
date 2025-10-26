@@ -71,6 +71,8 @@ gcloud iam service-accounts keys create ~/keys/<your credentials json file name>
    --iam-account=<your service account name>@<your project name>.iam.gserviceaccount.com
 ```
 
+Note: The service account key files are only recommended for development. According to the page https://cloud.google.com/docs/authentication/application-default-credentials: "Service account keys create a security risk and are not recommended".
+
 ## Running the Application
 
 Install dependencies and start the development server:
