@@ -28,20 +28,14 @@
     "fileSize": "{size} MB",
     "browserNotSupported": "Your browser does not support the video tag."
   },
-  "prompts": {
-    "start": "Extract from the video all scenes that match the description:",
-    "end": "Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50."
-  },
   "analyzes": [
     {
       "label": "The paperclip videos",
-      "description": "The paperclip is visible in these videos.",
-      "promptMiddle": "The paperclip is visible in the video."
+      "description": "The paperclip is visible in these videos."
     },
     {
       "label": "The tape roll videos",
-      "description": "The tape roll is visible in these videos.",
-      "promptMiddle": "The tape roll is visible in the video."
+      "description": "The tape roll is visible in these videos."
     }
   ]
 }

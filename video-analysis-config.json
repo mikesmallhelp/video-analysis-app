@@ -1,16 +1,10 @@
 {
-    "app-title": "AI object recognition application",
-    "guide-text": "Upload a video, and the AI will find the clips containing a paperclip or a tape roll.",
     "prompt-start": "Extract from the video all scenes that match the description:",
     "analyzes": [
         {
-            "ui-label": "The paperclip videos",
-            "ui-description": "The paperclip is visible in these videos.",
             "prompt-middle": "The paperclip is visible in the video."
         },
         {
-            "ui-label": "The tape roll videos",
-            "ui-description": "The tape roll is visible in these videos.",
             "prompt-middle": "The tape roll is visible in the video."
         }
     ],

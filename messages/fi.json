@@ -28,20 +28,14 @@
     "fileSize": "{size} Mt",
     "browserNotSupported": "Selaimesi ei tue video-elementtiä."
   },
-  "prompts": {
-    "start": "Poimi videosta kaikki kohtaukset, jotka vastaavat kuvausta:",
-    "end": "Vastaa vain kunkin kohtauksen alku- ja loppuajoilla muodossa: minuutit:sekunnit-minuutit:sekunnit. Listaa useita aikavälejä, jos vastaavia kohtauksia on useita. Esimerkiksi: 0:30-0:33, 1:15-1:18, 2:45-2:50."
-  },
   "analyzes": [
     {
       "label": "Paperiliitinvideot",
-      "description": "Paperiliitin näkyy näissä videoissa.",
-      "promptMiddle": "Paperilitin näkyy videossa."
+      "description": "Paperiliitin näkyy näissä videoissa."
     },
     {
       "label": "Teippirullavideot",
-      "description": "Teippirulla näkyy näissä videoissa.",
-      "promptMiddle": "Teippirulla näkyy videossa."
+      "description": "Teippirulla näkyy näissä videoissa."
     }
   ]
 }
