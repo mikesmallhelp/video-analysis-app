@@ -30,10 +30,12 @@
   },
   "analyzes": [
     {
+      "id": "paperclip",
       "label": "The paperclip videos",
       "description": "The paperclip is visible in these videos."
     },
     {
+      "id": "tape-roll",
       "label": "The tape roll videos",
       "description": "The tape roll is visible in these videos."
     }

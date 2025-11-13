@@ -2,9 +2,11 @@
     "prompt-start": "Extract from the video all scenes that match the description:",
     "analyzes": [
         {
+            "id": "paperclip",
             "prompt-middle": "The paperclip is visible in the video."
         },
         {
+            "id": "tape-roll",
             "prompt-middle": "The tape roll is visible in the video."
         }
     ],

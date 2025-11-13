@@ -16,6 +16,7 @@ interface TimeRange {
 }
 
 interface AnalysisTask {
+  id: string
   label: string
   description: string
   prompt: string
@@ -125,7 +126,9 @@ export default function VideoAnalysisApp() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to analyze video")
+        const errorData = await response.json().catch(() => null)
+        const errorMessage = errorData?.error || "Failed to analyze video"
+        throw new Error(errorMessage)
       }
 
       const result = await response.json()
@@ -156,7 +159,8 @@ export default function VideoAnalysisApp() {
         setIsClipping(false)
       }
     } catch (err) {
-      setError(t('errors.analysisFailed'))
+      const errorMessage = err instanceof Error ? err.message : t('errors.analysisFailed')
+      setError(errorMessage)
       console.error("Analysis error:", err)
     } finally {
       setIsAnalyzing(false)

@@ -30,10 +30,12 @@
   },
   "analyzes": [
     {
+      "id": "paperclip",
       "label": "Paperiliitinvideot",
       "description": "Paperiliitin näkyy näissä videoissa."
     },
     {
+      "id": "tape-roll",
       "label": "Teippirullavideot",
       "description": "Teippirulla näkyy näissä videoissa."
     }

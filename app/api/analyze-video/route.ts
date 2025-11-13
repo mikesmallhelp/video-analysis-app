@@ -80,9 +80,13 @@ export async function POST(request: NextRequest) {
     // Process all analysis tasks
     const analysisResults = []
 
-    for (let i = 0; i < config.analyzes.length; i++) {
-      const configTask = config.analyzes[i]
-      const messageTask = messages.analyzes[i]
+    for (const configTask of config.analyzes) {
+      // Find matching message task by id
+      const messageTask = messages.analyzes.find((t: { id: string }) => t.id === configTask.id)
+
+      if (!messageTask) {
+        throw new Error(`Configuration error: No matching translation found for analysis id "${configTask.id}"`)
+      }
 
       const aiPromptStart = config["prompt-start"]
       const aiPromptMiddle = configTask["prompt-middle"]
@@ -92,7 +96,7 @@ export async function POST(request: NextRequest) {
         throw new Error('Configuration error: "prompt-start" is required and cannot be empty')
       }
       if (!aiPromptMiddle || aiPromptMiddle.trim() === "") {
-        throw new Error(`Configuration error: "prompt-middle" is required and cannot be empty for task index ${i}`)
+        throw new Error(`Configuration error: "prompt-middle" is required and cannot be empty for analysis id "${configTask.id}"`)
       }
       if (!aiPromptEnd || aiPromptEnd.trim() === "") {
         throw new Error('Configuration error: "prompt-end" is required and cannot be empty')
@@ -100,7 +104,7 @@ export async function POST(request: NextRequest) {
 
       const aiPrompt = `${aiPromptStart} ${aiPromptMiddle} ${aiPromptEnd}`
 
-      console.log(`Processing task: ${messageTask.label}`)
+      console.log(`Processing task: ${messageTask.label} (id: ${configTask.id})`)
       console.log(`Using prompt: ${aiPrompt}`)
 
       try {
@@ -133,6 +137,7 @@ export async function POST(request: NextRequest) {
         console.log(`Extracted ${timeRanges.length} time ranges:`, timeRanges)
 
         analysisResults.push({
+          id: configTask.id,
           label: messageTask.label,
           description: messageTask.description || "",
           prompt: configTask["prompt-middle"],
@@ -142,6 +147,7 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         console.error(`Error processing task ${messageTask.label}:`, error)
         analysisResults.push({
+          id: configTask.id,
           label: messageTask.label,
           description: messageTask.description || "",
           prompt: configTask["prompt-middle"],
