@@ -134,8 +134,11 @@ export default function VideoAnalysisApp() {
       const result = await response.json()
       setAnalysisResult(result)
 
+      // Check if any time ranges were found
+      const hasTimeRanges = result.results?.some((task: AnalysisTask) => task.timeRanges.length > 0)
+
       // Automatically clip all found video segments
-      if (result.results?.length > 0) {
+      if (result.results?.length > 0 && hasTimeRanges) {
         setIsClipping(true)
         const newClippedVideos: ClippedVideo[] = []
 
@@ -157,6 +160,9 @@ export default function VideoAnalysisApp() {
         setClippedVideos(newClippedVideos)
         setClippingProgress("")
         setIsClipping(false)
+      } else {
+        // No objects were found in the video
+        setError(t('errors.noObjectsFound'))
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : t('errors.analysisFailed')

@@ -16,7 +16,8 @@
   "errors": {
     "invalidFile": "Please select a valid video file",
     "analysisFailed": "Failed to analyze video. Please try again.",
-    "clipFailed": "Failed to clip video"
+    "clipFailed": "Failed to clip video",
+    "noObjectsFound": "No paperclips or tape rolls were found in the video."
   },
   "processing": {
     "title": "Processing Videos",

@@ -10,5 +10,5 @@
             "prompt-middle": "The tape roll is visible in the video."
         }
     ],
-    "prompt-end": "Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50."
+    "prompt-end": "Only scenes in which the condition above is certainly fulfilled may be reported. If you are not completely sure, do not list the scene at all. Respond only with the start and end times of each scene in the format: minutes:seconds-minutes:seconds. List multiple time ranges if there are several matching scenes. For example: 0:30-0:33, 1:15-1:18, 2:45-2:50. If the video contains only one desired scene, respond with only one time range. For example: 2:45-2:50. If the desired scenes cannot be found in the video, respond with an empty answer."
 }

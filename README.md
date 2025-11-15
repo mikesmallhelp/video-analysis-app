@@ -81,7 +81,7 @@ Note: The service account key files are only recommended for development. Accord
 Install dependencies and start the development server:
 
 ```
-npm i
+npm i --legacy-peer-deps
 npm run dev
 ```
 
