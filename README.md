@@ -78,6 +78,8 @@ Note: The service account key files are only recommended for development. Accord
 
 ## Running the Application
 
+If you don’t have the FFmpeg application installed yet, please install it on your computer or server. For more information, visit https://www.ffmpeg.org/.
+
 Install dependencies and start the development server:
 
 ```
