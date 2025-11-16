@@ -44,6 +44,7 @@ export default function VideoAnalysisApp() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [clippedVideos, setClippedVideos] = useState<ClippedVideo[]>([])
   const [error, setError] = useState<string>("")
+  const [infoMessage, setInfoMessage] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const appTitle = t('app.title')
@@ -85,6 +86,7 @@ export default function VideoAnalysisApp() {
       setVideoUrl(URL.createObjectURL(selectedFile))
       setClippedVideos([])
       setError("")
+      setInfoMessage("")
       setAnalysisResult(null)
     } else {
       setError(t('errors.invalidFile'))
@@ -115,6 +117,7 @@ export default function VideoAnalysisApp() {
 
     setIsAnalyzing(true)
     setError("")
+    setInfoMessage("")
 
     try {
       const formData = new FormData()
@@ -162,7 +165,7 @@ export default function VideoAnalysisApp() {
         setIsClipping(false)
       } else {
         // No objects were found in the video
-        setError(t('errors.noObjectsFound'))
+        setInfoMessage(t('infoMessages.noObjectsFound'))
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : t('errors.analysisFailed')
@@ -184,6 +187,7 @@ export default function VideoAnalysisApp() {
     setClippedVideos([])
     setAnalysisResult(null)
     setError("")
+    setInfoMessage("")
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
@@ -269,6 +273,14 @@ export default function VideoAnalysisApp() {
           <Alert variant="destructive" className="mb-8">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Info Message Display */}
+        {infoMessage && (
+          <Alert className="mb-8">
+            <CheckCircle className="h-4 w-4" />
+            <AlertDescription>{infoMessage}</AlertDescription>
           </Alert>
         )}
 

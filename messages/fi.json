@@ -16,7 +16,9 @@
   "errors": {
     "invalidFile": "Valitse kelvollinen videotiedosto",
     "analysisFailed": "Videon analysointi epäonnistui. Yritä uudelleen.",
-    "clipFailed": "Videon leikkaus epäonnistui",
+    "clipFailed": "Videon leikkaus epäonnistui"
+  },
+  "infoMessages": {
     "noObjectsFound": "Videolta ei löytynyt paperiliittimiä tai teippirullia."
   },
   "processing": {
